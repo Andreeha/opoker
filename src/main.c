@@ -1,4 +1,3 @@
-#include <raylib.h>
 #include <math.h>
 
 #define __POKEROK_IMPLEMENTATION
@@ -6,6 +5,8 @@
 
 int main () {
   Deck *d = createDeck(d);
+  shuffleDeck(d);
+
   Rules rules;
 
   rules.fontSize = 20;
@@ -13,6 +14,11 @@ int main () {
   rules.screenHeight = 600;
   rules.cardWidth = 40;
   rules.cardHeight = 60;
+  rules.nPlayers = 5;
+
+  for (int i = 0; i < numberOfDeals(&rules); i++) {
+    printf("%s\n", currentDeal(&rules, i));
+  }
 
   InitWindow(rules.screenWidth, rules.screenHeight, "POKEROK");
   SetTargetFPS(60);
@@ -23,11 +29,11 @@ int main () {
       ClearBackground((Color){220,220,220,255});
       for (int s = 0; s < oN_SUITS; s++) {
         for (int r = 0; r < oN_RATING; r++) {
-          drawCardAt(&rules, &d->cards[2 + s * oN_RATING + r], (Vector2){10 + r * (rules.cardWidth + 10), 10 + s * (rules.cardHeight + 10)});
+          drawCardAt(&rules, &d->cards[d->shuffle[2 + s * oN_RATING + r]], (Vector2){10 + r * (rules.cardWidth + 10), 10 + s * (rules.cardHeight + 10)});
         }
       }
-      drawCardAt(&rules, &d->cards[0], (Vector2){10, 300});
-      drawCardAt(&rules, &d->cards[1], (Vector2){20 + rules.cardWidth, 300});
+      drawCardAt(&rules, &d->cards[d->shuffle[0]], (Vector2){10, 300});
+      drawCardAt(&rules, &d->cards[d->shuffle[1]], (Vector2){20 + rules.cardWidth, 300});
     EndDrawing();
   }
 

@@ -1,7 +1,9 @@
 #ifndef __POKEROK_H
+#include <raylib.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #define oHEARTS   0x01
 #define oDIAMONDS 0x11
@@ -37,7 +39,16 @@ typedef struct {
 
 typedef struct {
   Card* cards;
+  int* shuffle;
 } Deck;
+
+typedef struct {
+  void *rule;
+} Round;
+
+typedef struct {
+  Card* cards;
+} Player;
 
 typedef struct {
   int fontSize;
@@ -45,16 +56,24 @@ typedef struct {
   int screenHeight;
   int cardWidth;
   int cardHeight;
+
+  int nPlayers;
+  Player *players;
+  int *playerScores;
+
+  int round;
 } Rules;
 
-typedef struct {
-  Card* cards;
-} Player;
 
 Deck* createDeck();
 Color cardColor(Card *c);
 const char* ratingToChar(Card *c);
 char suitToChar(Card *c);
+
+void shuffleDeck(Deck *d);
+
+int numberOfDeals(Rules *r);
+const char* currentDeal(Rules *r, int iDeal);
 
 // visual
 void drawCardAt(Rules *r, Card* c, Vector2 p);
@@ -64,6 +83,7 @@ void drawCardAt(Rules *r, Card* c, Vector2 p);
 #ifdef __POKEROK_IMPLEMENTATION
 
 Deck* createDeck() {
+  srand(time(NULL));
   char str[64];
   Deck* d = malloc(sizeof(Deck));
   d->cards = malloc(sizeof(Card) * oN_CARDS);
@@ -89,6 +109,26 @@ Deck* createDeck() {
     }
   }
   return d;
+}
+
+void shuffleDeck(Deck *d) {
+  if (!d->shuffle) {
+    d->shuffle = malloc(oN_CARDS * sizeof(int));
+  }
+  for (int i = 0; i < oN_CARDS; i++) {
+    int nu_i = rand() % (oN_CARDS - i);
+    for (int j = 0, nu_j = -1; j < oN_CARDS; j++) {
+      int used = 0;
+      for (int k = 0; k < i; k++) {
+        if (j == d->shuffle[k]) used = 1;
+      }
+      nu_j += !used;
+      if (nu_j == nu_i) {
+        d->shuffle[i] = j;
+        break;
+      }
+    }
+  }
 }
 
 Color cardColor(Card *c) {
@@ -125,5 +165,18 @@ void drawCardAt(Rules *r, Card* c, Vector2 p) {
   DrawText(c->s, x, y, r->fontSize, cardColor(c));
 }
 
+int numberOfDeals(Rules *r) {
+  return 8 + (r->nPlayers + 1) + 8 + 4;
+}
+
+const char* currentDeal(Rules *r, int iDeal) {
+  const char* d[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
+  const char* s[] = {"no trump", "blind", "dog-poor", "golden"};
+  if (iDeal < 8) return d[iDeal];
+  if (iDeal < 8 + r->nPlayers + 1) return d[8];
+  if (iDeal < 8 + r->nPlayers + 1 + 8) return d[(8 + r->nPlayers + 1 + 8 - iDeal - 1)];
+  if (iDeal < 8 + r->nPlayers + 1 + 8 + 4) return s[iDeal - (8 + r->nPlayers + 1 + 8)];
+  return "no such deal";
+}
 
 #endif // __POKEROK_IMPLEMENTATION
