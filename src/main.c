@@ -4,37 +4,40 @@
 #include <pokerok.h>
 
 int main () {
-  Deck *d = createDeck(d);
-  shuffleDeck(d);
+  Game game;
+  init(&game, 6);
 
-  Rules rules;
+  Rules *rules = game.rules;
 
-  rules.fontSize = 20;
-  rules.screenWidth = 800;
-  rules.screenHeight = 600;
-  rules.cardWidth = 40;
-  rules.cardHeight = 60;
-  rules.nPlayers = 5;
+  shuffleDeck(game.rules->deck);
 
-  for (int i = 0; i < numberOfDeals(&rules); i++) {
-    printf("%s\n", currentDeal(&rules, i));
+  for (int i = 0; i < numberOfDeals(&game); i++) {
+    printf("%s\n", currentDeal(&game, i));
   }
 
-  InitWindow(rules.screenWidth, rules.screenHeight, "POKEROK");
+  for (int i = 0; i < game.nPlayers; i++) {
+    dealToPlayer(&game, i);
+  }
+
+  InitWindow(rules->screenWidth, rules->screenHeight, "POKEROK");
   SetTargetFPS(60);
 
+  int cnt = 0;
 
-  while(!WindowShouldClose()) {
+  while(!WindowShouldClose() && dealHandSize(&game)) {
     BeginDrawing();
       ClearBackground((Color){220,220,220,255});
-      for (int s = 0; s < oN_SUITS; s++) {
-        for (int r = 0; r < oN_RATING; r++) {
-          drawCardAt(&rules, &d->cards[d->shuffle[2 + s * oN_RATING + r]], (Vector2){10 + r * (rules.cardWidth + 10), 10 + s * (rules.cardHeight + 10)});
-        }
+      for (int i = 0; i < game.nPlayers; i++) {
+        drawPlayerHandAt(rules, game.players[i], (Vector2){0, 10 + (10 + rules->cardHeight) * i});
       }
-      drawCardAt(&rules, &d->cards[d->shuffle[0]], (Vector2){10, 300});
-      drawCardAt(&rules, &d->cards[d->shuffle[1]], (Vector2){20 + rules.cardWidth, 300});
     EndDrawing();
+    if ((++cnt) % 100 == 0) {
+      game.round++;
+      shuffleDeck(game.rules->deck);
+      for (int i = 0; i < game.nPlayers; i++) {
+        dealToPlayer(&game, i);
+      }
+    }
   }
 
   CloseWindow();
