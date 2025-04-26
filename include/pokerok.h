@@ -181,20 +181,6 @@ int isHovered(Vector2 tl, Vector2 br) {
   return tl.x <= mp.x && tl.y <= mp.y && br.x >= mp.x && br.y >= mp.y;
 }
 
-// visual
-void drawCardAt(Rules *r, Card* c, Vector2 p) {
-  if (isHovered(p, (Vector2){p.x + r->cardWidth, p.y + r->cardHeight})) {
-    DrawRectangleV(p, (Vector2){r->cardWidth, r->cardHeight}, PINK);
-  }
-  DrawLineV(p, (Vector2){p.x + r->cardWidth, p.y}, BLACK);
-  DrawLineV(p, (Vector2){p.x, p.y + r->cardHeight}, BLACK);
-  DrawLineV((Vector2){p.x + r->cardWidth, p.y + r->cardHeight}, (Vector2){p.x + r->cardWidth, p.y}, BLACK);
-  DrawLineV((Vector2){p.x + r->cardWidth, p.y + r->cardHeight}, (Vector2){p.x, p.y + r->cardHeight}, BLACK);
-  int x = p.x + (r->cardWidth - MeasureText(c->s, r->fontSize)) / 2;
-  int y = p.y + (r->cardHeight - r->fontSize) / 2;
-  DrawText(c->s, x, y, r->fontSize, cardColor(c));
-}
-
 int numberOfDeals(Game *g) {
   return 8 + (g->nPlayers + 1) + 8 + 4;
 }
@@ -208,6 +194,7 @@ const char* currentDeal(Game *g, int iDeal) {
   if (iDeal < 8 + g->nPlayers + 1 + 8 + 4) return s[iDeal - (8 + g->nPlayers + 1 + 8)];
   return "no such deal";
 }
+
 int dealHandSize(Game *g) {
   int d[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
   int s[] = {9,9,9,9};
@@ -233,6 +220,20 @@ void dealToPlayer(Game *g, int player_index) {
   for (int i = 0; i < l; i++) {
     g->players[player_index]->cards[i] = g->rules->deck->cards[g->rules->deck->shuffle[i + offset]];
   }
+}
+
+// visual
+void drawCardAt(Rules *r, Card* c, Vector2 p) {
+  if (isHovered(p, (Vector2){p.x + r->cardWidth, p.y + r->cardHeight})) {
+    DrawRectangleV(p, (Vector2){r->cardWidth, r->cardHeight}, PINK);
+  }
+  DrawLineV(p, (Vector2){p.x + r->cardWidth, p.y}, BLACK);
+  DrawLineV(p, (Vector2){p.x, p.y + r->cardHeight}, BLACK);
+  DrawLineV((Vector2){p.x + r->cardWidth, p.y + r->cardHeight}, (Vector2){p.x + r->cardWidth, p.y}, BLACK);
+  DrawLineV((Vector2){p.x + r->cardWidth, p.y + r->cardHeight}, (Vector2){p.x, p.y + r->cardHeight}, BLACK);
+  int x = p.x + (r->cardWidth - MeasureText(c->s, r->fontSize)) / 2;
+  int y = p.y + (r->cardHeight - r->fontSize) / 2;
+  DrawText(c->s, x, y, r->fontSize, cardColor(c));
 }
 
 void drawPlayerHandAt(Rules *r, Player *pl, Vector2 p) {
