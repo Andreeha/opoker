@@ -1,3 +1,8 @@
 build/
 lib/
+android.*/
+external/
+
+*.o
+*.apk
 *.swp
