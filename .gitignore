@@ -2,6 +2,7 @@ build/
 lib/
 android.*/
 external/
+resources/
 
 *.o
 *.apk
